@@ -49,7 +49,7 @@ function App() {
     async function fetchData() {
       //This network call should be in an action
 
-      const response = await fetch("https://opentdb.com/api.php?amount=5");
+      const response = await fetch("https://opentdb.com/api.php?amount=10");
       const questions = await response.json();
 
       //this logic should be in a reducer
