@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 
 import "./App.css";
@@ -8,8 +9,12 @@ import GameOver from "./components/gameover";
 import PageCenter from "./components/page-center";
 import Question from "./components/question";
 import Summary from "./components/summary";
-
-import { getPointsFromDifficulty } from "./util";
+import { fetchTrivia } from "./feature/trivia/triviaSlice";
+import {
+  incrementPointsByAmount,
+  setActiveQuestionIndex,
+  setAnswers,
+} from "./feature/game/gameSlice";
 
 const FlexWrapper = styled.div`
   display: flex;
@@ -36,47 +41,30 @@ const FancyButton = styled.button`
 `;
 
 function App() {
-  // redux is overkill for this but
-  // most of this states should be in redux
-  const [points, setPoints] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const dispatch = useDispatch();
+  const { loading, questions } = useSelector((state) => state.trivia);
+  const { points, activeQuestionIndex, answers } = useSelector(
+    (state) => state.game
+  );
+
   const [isGameOver, setIsGameOver] = useState(false);
-  const [answers, setAnswers] = useState([]);
-  const [questions, setQuestions] = useState([]);
-  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
 
   useEffect(() => {
-    async function fetchData() {
-      //This network call should be in an action
+    dispatch(fetchTrivia());
+  }, [dispatch]);
 
-      const response = await fetch("https://opentdb.com/api.php?amount=10");
-      const questions = await response.json();
-
-      //this logic should be in a reducer
-      const enrichedResults = questions.results.map((answer) => {
-        //pseudo randomize the list of answers
-        answer.allAnswers = [
-          answer.correct_answer,
-          ...answer.incorrect_answers,
-        ].sort(() => (Math.random() > 0.5 ? 1 : -1));
-        answer.points = getPointsFromDifficulty(answer.difficulty);
-        return answer;
-      });
-
-      setQuestions(enrichedResults);
-      setIsLoaded(true);
-    }
-    fetchData();
-  }, []);
-
-  if (!isLoaded) {
-    return <PageCenter>LOADING...</PageCenter>;
+  if (loading) {
+    return (
+      <PageCenter>
+        <p>LOADING...</p>
+      </PageCenter>
+    );
   }
 
   // react-router is overkill for this scenario
   // but this should be a route
   if (isGameOver) {
-    return <GameOver points={points}></GameOver>;
+    return <GameOver />;
   }
 
   const activeQuestion = questions[activeQuestionIndex];
@@ -96,7 +84,9 @@ function App() {
         <FancyButton
           aria-label="previous question"
           disabled={activeQuestionIndex === 0}
-          onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}
+          onClick={() =>
+            dispatch(setActiveQuestionIndex(activeQuestionIndex - 1))
+          }
         >
           {"<"}
         </FancyButton>
@@ -106,9 +96,9 @@ function App() {
           category={category}
           difficulty={difficulty}
           onAnswer={(a) => {
-            setAnswers([...answers, a]);
+            dispatch(setAnswers([...answers, a]));
             if (a === correct_answer) {
-              setPoints(points + activeQuestion.points);
+              dispatch(incrementPointsByAmount(activeQuestion.points));
             }
           }}
           readOnly={answers.length > activeQuestionIndex}
@@ -119,7 +109,9 @@ function App() {
           <FancyButton
             aria-label="next question"
             disabled={answers.length <= activeQuestionIndex}
-            onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}
+            onClick={() =>
+              dispatch(setActiveQuestionIndex(activeQuestionIndex + 1))
+            }
           >
             {">"}
           </FancyButton>

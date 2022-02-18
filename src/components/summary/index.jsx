@@ -26,7 +26,7 @@ const Summary = ({ points, numberOfAnswers }) => {
 
 Summary.propTypes = {
   numberOfAnswers: PropTypes.number,
-  points: PropTypes.string,
+  points: PropTypes.number,
 };
 
 export default Summary;
