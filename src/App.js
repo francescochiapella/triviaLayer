@@ -56,7 +56,7 @@ function App() {
   if (loading) {
     return (
       <PageCenter>
-        <p>LOADING...</p>
+        <p data-testid="loadingTriviaId">LOADING...</p>
       </PageCenter>
     );
   }

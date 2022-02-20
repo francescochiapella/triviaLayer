@@ -34,7 +34,8 @@ export const { triviaLoading, triviaReceived } = triviaSlice.actions;
 
 export const fetchTrivia = () => async (dispatch) => {
   dispatch(triviaLoading());
-  const response = await fetch("https://opentdb.com/api.php?amount=2");
+  const response = await fetch("https://opentdb.com/api.php?amount=10");
+
   dispatch(triviaReceived(await response.json()));
 };
 

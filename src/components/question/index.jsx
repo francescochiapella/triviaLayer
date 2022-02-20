@@ -25,7 +25,7 @@ const Question = ({
   return (
     <Wrapper>
       <QuestionInfoText>
-        Category: <b>{category}</b> <br></br> Difficulty : <b>{difficulty}</b>
+        Category: <b>{category}</b> <br></br> Difficulty: <b>{difficulty}</b>
       </QuestionInfoText>
       {/* I hate use dangerouslySetInnerHTML due to XSS vulnerability, but its the fastest way to avoid html entities character, the XSS issue should be neutralized by DOMPurify*/}
       <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(text) }}></p>
